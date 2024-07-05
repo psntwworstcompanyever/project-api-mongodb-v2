@@ -13,6 +13,7 @@ env.read_env()
 # Load environment variables
 AWS_ACCESS_KEY_ID = env.str("ACCESS_KEY")
 AWS_SECRET_ACCESS_KEY = env.str("SECRET_KEY")
+AWS_REGION = env.str("REGION")
 
 from db import (
     get_cell_table,
@@ -78,6 +79,7 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
             "s3",
             aws_access_key_id=AWS_ACCESS_KEY_ID,
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_REGION,
         )
         file_content = download_file_from_s3(s3_client, bucket_name, s3_filename)
         if file_content is None:
@@ -91,6 +93,7 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
             "ses",
             aws_access_key_id=AWS_ACCESS_KEY_ID,
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_REGION,
         )
         response = send_email_with_attachment(
             ses_client, sender, recipient, subject, body, modified_content, s3_filename
