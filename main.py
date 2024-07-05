@@ -16,9 +16,7 @@ app = FastAPI(
     summary="Test API",
 )
 
-origins = [
-    "http://localhost:3000",
-]
+origins = ["http://localhost:3000", "https://project-form-v2.onrender.com"]
 
 app.add_middleware(
     CORSMiddleware,
