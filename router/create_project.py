@@ -1,9 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict
+from environs import Env
 
 import boto3
 from aws_function.custom_aws import download_file_from_s3, send_email_with_attachment
 from aws_function.custom_excel import modify_worksheet
+
+# Initialize environs
+env = Env()
+env.read_env()
+
+# Load environment variables
+AWS_ACCESS_KEY_ID = env.str("ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = env.str("SECRET_KEY")
 
 from db import (
     get_cell_table,
@@ -15,15 +24,10 @@ router = APIRouter()
 @router.post("/submit")
 async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
     try:
-        # Print the from data send from frontend.
-        print(data["hardware"])
-        print(data["software"])
-
         # Query the cell_table from MongoDB
         cell_table_list = await collection.find({}, {"_id": 0}).to_list(None)
         if not cell_table_list:
             raise HTTPException(status_code=404, detail="Cell table not found")
-        print(cell_table_list)
 
         # Result Dictionary
         result_dict = {}
@@ -36,9 +40,6 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
             cell = item["cell"]
             if name in source_dict:
                 result_dict[cell] = source_dict[name]
-
-        # Print the result
-        print(result_dict)
 
         # Send a mail via AWS
         cdn_info = {
@@ -73,7 +74,11 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
         modifications = data["application_content"]
 
         # Download file from S3
-        s3_client = boto3.client("s3")
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        )
         file_content = download_file_from_s3(s3_client, bucket_name, s3_filename)
         if file_content is None:
             return
@@ -82,7 +87,11 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
         modified_content = modify_worksheet(file_content, modifications)
 
         # Send email with attachment
-        ses_client = boto3.client("ses")
+        ses_client = boto3.client(
+            "ses",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        )
         response = send_email_with_attachment(
             ses_client, sender, recipient, subject, body, modified_content, s3_filename
         )
