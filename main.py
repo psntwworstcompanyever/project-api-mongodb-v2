@@ -5,6 +5,7 @@ from router import (
     hardware_settings,
     software_settings,
     customer_settings,
+    email_settings,
     note,
     create_project,
 )
@@ -26,10 +27,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello World"}
+
+
 app.include_router(pcba_list.router, prefix="/pcba-list")
 app.include_router(customer_list.router, prefix="/customer-list")
 app.include_router(hardware_settings.router, prefix="/hardware-settings")
 app.include_router(software_settings.router, prefix="/software-settings")
 app.include_router(customer_settings.router, prefix="/customer-settings")
+app.include_router(email_settings.router, prefix="/email-settings")
 app.include_router(note.router, prefix="/note")
 app.include_router(create_project.router, prefix="/create-project")

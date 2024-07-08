@@ -20,16 +20,19 @@ async def get_note(
     collection_customer_note=Depends(get_customer_settings),
 ):
     query_spec_note = await collection_spec_note.find_one({"name": spec})
+    if query_spec_note is None:
+        query_spec_note = {"note": "API find no record."}
     query_customer_note = await collection_customer_note.find_one(
         {"specification": spec, "customer": customer}
     )
-    spec_note = query_spec_note["note"]
-    customer_note = query_customer_note["note"]
+    if query_customer_note is None:
+        query_customer_note = {"note": "API find no record."}
+
     return [
         {
-            "illustration": spec_note,
+            "illustration": query_spec_note["note"],
         },
         {
-            "recommendation": customer_note,
+            "recommendation": query_customer_note["note"],
         },
     ]

@@ -48,11 +48,13 @@ async def receive_form_data(data: Dict, collection=Depends(get_cell_table)):
             "s3_filename": "software_application_template_v1.xlsx",
         }
 
+        # Fill mailing info by reading form.
+        mailing_info = data["email"]
         mail_info = {
             "sender": "fs_foxconn_mcd_gitee@outlook.com",
-            "recipient": "kun-che.lee@ftc-foxconn.com",
-            "subject": "Software Application System",
-            "body": "Please find the attached Excel file.",
+            "recipient": mailing_info["email_address"],
+            "subject": mailing_info["email_subject"],
+            "body": mailing_info["email_body"],
         }
 
         application_content = result_dict

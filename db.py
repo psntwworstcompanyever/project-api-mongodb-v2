@@ -39,6 +39,11 @@ def get_customer_settings():
     return db.get_collection("customer_settings")
 
 
+def get_email_settings():
+    db = get_database()
+    return db.get_collection("email_settings")
+
+
 def get_spec_note():
     db = get_database()
     return db.get_collection("spec_note")
